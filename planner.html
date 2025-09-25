@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Explorer - My Trip Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased">
+
+    <nav class="sticky top-0 bg-slate-900/80 backdrop-blur-sm shadow z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-extrabold text-blue-400">TravelExplorer</a>
+            <a href="planner.html" class="font-semibold hover:text-blue-400 transition">My Trip Planner</a>
+        </div>
+    </nav>
+    
+    <main class="container mx-auto px-6 py-12">
+        <div id="itinerary-container" class="max-w-4xl mx-auto"></div>
+    </main>
+
+    <script>
+        // Script is unchanged
+        let itinerary = [];
+        const itineraryContainer = document.getElementById('itinerary-container');
+        const saveItinerary = () => localStorage.setItem('travelItinerary', JSON.stringify(itinerary));
+        const removeFromItinerary = (index) => { itinerary.splice(index, 1); saveItinerary(); displayItinerary(); };
+        const clearItinerary = () => { if (confirm('Are you sure you want to clear your entire itinerary?')) { itinerary = []; saveItinerary(); displayItinerary(); } };
+        const downloadAsPdf = () => { const { jsPDF } = window.jspdf; const pdf = new jsPDF('portrait', 'pt', 'a4'); pdf.setFont('Inter', 'normal'); pdf.setFontSize(24); pdf.text('My Trip Itinerary', 40, 60); pdf.setFontSize(12); let y = 100; itinerary.forEach(item => { if (y > 800) { pdf.addPage(); y = 60; } const itemText = `• ${item.name} (${item.city}, ${item.type})`; pdf.text(itemText, 40, y); y += 20; }); pdf.save('Travel-Itinerary.pdf'); };
+        const displayItinerary = () => { if (itinerary.length === 0) { itineraryContainer.innerHTML = `<div class="card p-10 text-center rounded-xl shadow-lg"><h1 class="text-3xl font-bold mb-4">Your Itinerary is Empty</h1><p class="text-slate-400 mb-6">Start exploring and add attractions or hotels to plan your trip.</p><a href="index.html" class="bg-blue-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-blue-700">Start Exploring</a></div>`; return; } const itemsHtml = itinerary.map((item, index) => `<li class="flex justify-between items-center p-4 border-b border-slate-700"><div><p class="font-bold text-lg">${item.name}</p><p class="text-sm text-slate-400">${item.city} (${item.type})</p></div><button onclick="removeFromItinerary(${index})" class="text-red-500 font-bold hover:text-red-400 px-2 text-2xl">×</button></li>`).join(''); itineraryContainer.innerHTML = `<div class="card rounded-xl shadow-lg"><div class="p-6 border-b border-slate-700"><h1 class="text-3xl font-bold text-center">My Trip Itinerary</h1></div><ul class="list-none">${itemsHtml}</ul><div class="p-6 bg-slate-900 rounded-b-xl flex flex-col md:flex-row gap-4"><button onclick="downloadAsPdf()" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Download as PDF</button><button onclick="clearItinerary()" class="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">Clear All Items</button></div></div>`; };
+        document.addEventListener('DOMContentLoaded', () => { const saved = localStorage.getItem('travelItinerary'); if (saved) itinerary = JSON.parse(saved); displayItinerary(); });
+    </script>
+</body>
+</html>
